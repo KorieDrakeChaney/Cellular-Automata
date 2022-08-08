@@ -1,0 +1,21 @@
+{
+  "name": "cellular-automata",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "npx gh-pages -d .html -t true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KorieDrakeChaney/Cellular-Automata.git"
+  },
+  "author": "KorieDrakeChaney",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KorieDrakeChaney/Cellular-Automata/issues"
+  },
+  "homepage": "https://github.com/KorieDrakeChaney/Cellular-Automata#readme",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}
