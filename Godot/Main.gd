@@ -7,6 +7,7 @@ const CELLSIZE : int = 4;
 onready var SCREEN_SIZE = get_viewport_rect().size;
 
 var columns = [];
+var rows = 0;
 var generation : int = 0;
 var selected : Array = [0, 1];
 var play : bool = true;
@@ -18,7 +19,8 @@ func _ready():
 
 func create_grid():
 	var rng = RandomNumberGenerator.new()
-	for y in range(-1, SCREEN_SIZE.y / CELLSIZE):
+	rows = int(floor(SCREEN_SIZE.y / CELLSIZE));
+	for y in range(0, rows):
 		var new_column = []
 		for x in range(0, SCREEN_SIZE.x / CELLSIZE):
 			var cell = Cell.instance();
@@ -28,12 +30,8 @@ func create_grid():
 			new_column.append(cell)
 			add_child(cell);
 		columns.append(new_column)
-
-	var count : int = 0;
-	for cell in columns[0]:
-		count += 1;
 	
-	columns[0][int(round(count / 2))].state = 1
+	columns[0][int(round(columns[0].size() / 2))].state = 1
 
 func rule_to_binary(rule : float) -> Array:
 	var binary = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -49,32 +47,14 @@ func rule_to_binary(rule : float) -> Array:
 	
 
 func alive_process():
-	var cell_y = SCREEN_SIZE.y / CELLSIZE;
-	var cell_x = SCREEN_SIZE.x / CELLSIZE;
-	
-	generation += 1;
-	
-	if generation % (int(round(cell_y))) == 0:
-		rule = (rule + 1) % 255
-		generation = 0
-		clear()
-		if(selected[1] + 1 > columns[selected[0]].size() - 1):
-			if(selected[0] + 1 > columns.size() - 1):
-				selected[0] = 0;
-				selected[1] = 0;
-			else:
-				selected[0] += 1;
-				selected[1] = 0;
-		else:
-			selected[1] += 1
 	
 	var binary = rule_to_binary(rule);
 	var count = 0;
-	for cell in columns[0]:
+	for cell in columns[generation]:
 		var right = 0;
-		if count < columns[0].size() - 1: right = columns[0][count + 1].state
+		if count < columns[generation].size() - 1: right = columns[generation][count + 1].state
 		var left = 0;
-		if count > 0: left = columns[0][count - 1].state
+		if count > 0: left = columns[generation][count - 1].state
 		var set = [
 			left,
 			cell.state,
@@ -98,20 +78,30 @@ func alive_process():
 			[1, 1, 1]:
 				columns[generation + 1][count].state = binary[0]
 	
-		columns[0][count].state = columns[generation][count].state;
 		count +=1
-	
+
+	generation += 1;
+	if generation % (rows - 1) == 0:
+		rule = (rule + 1) % 255
+		clear()
+		if(selected[1] + 1 > columns[selected[0]].size() - 1):
+			if(selected[0] + 1 > columns.size() - 1):
+				selected[0] = 0;
+				selected[1] = 0;
+			else:
+				selected[0] += 1;
+				selected[1] = 0;
+		else:
+			selected[1] += 1
+
 	
 func clear():
 	for column in columns:
 		for cell in column:
 			cell.state = 0;
-	
-	var count : int = 0;
-	for cell in columns[0]:
-		count += 1;
-	
-	columns[0][int(round(count / 2))].state = 1
+			
+	generation = 0;
+	columns[0][int(floor(columns[0].size() / 2))].state = 1
 	
 func check_box():
 	
@@ -145,9 +135,14 @@ func _unhandled_input(event):
 			clear();
 		if event.pressed and event.scancode == KEY_RIGHT:
 			rule = (rule + 1) % 255
+			clear();
 		if event.pressed and event.scancode == KEY_LEFT:
-			if rule - 1 == -1: rule = 255;
-			else: rule -= 1;
+			if rule - 1 == -1: 
+				rule = 255;
+				clear();
+			else: 
+				rule -= 1;
+				clear();
 	if event is InputEventMouseButton:
 		if event.pressed:
 			check_box();

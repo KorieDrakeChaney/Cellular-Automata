@@ -7,3 +7,6 @@
 /.assets_db/
 /Godot/node_modules/
 yarn.lock
+/Godot/GodotSharp/
+/Godot/.mono
+/Godot/.import
